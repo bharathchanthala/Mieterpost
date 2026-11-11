@@ -8,13 +8,14 @@ classifies them and drafts a reply, and the landlord approves it.
 - Next.js (App Router), TypeScript, Tailwind CSS
 - PostgreSQL, Drizzle ORM
 - shadcn/ui components
-- Planned: LLM agent with tool calling, Inngest durable workflows
+- Vercel AI SDK with Gemini (structured output and tool calling)
+- Planned: Inngest durable workflows
 
 ## Getting started
 
 1. Install dependencies: `npm install`
 2. Create a database: `createdb -U postgres mieterpost` (or use pgAdmin).
-3. Copy `.env.example` to `.env.local` and set your PostgreSQL password.
+3. Copy `.env.example` to `.env.local` and set your PostgreSQL password and Gemini API key.
 4. Create the tables: `npm run db:push`
 5. Add demo data: `npm run db:seed`
 6. Start the app: `npm run dev` and open http://localhost:3000
@@ -37,6 +38,6 @@ classifies them and drafts a reply, and the landlord approves it.
 
 - [x] 1. Setup and data model
 - [x] 2. Dashboard UI (inbox, message detail, tenants and units)
-- [ ] 3. AI agent (classify, look up tenant data, draft reply)
+- [x] 3. AI agent (classify, look up tenant data, draft reply)
 - [ ] 4. Durable workflow (approval, send, follow-up)
 - [ ] 5. Auth, polish, deploy

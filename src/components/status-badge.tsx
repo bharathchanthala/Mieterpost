@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { Message } from "@/db/schema";
-import { categoryLabels, statusLabels } from "@/lib/format";
+import { categoryLabels, statusLabels, urgencyLabels } from "@/lib/format";
 
 // New messages stand out; handled ones are visually quieter.
 const statusVariant = {
@@ -17,4 +17,13 @@ export function CategoryBadge({ category }: { category: Message["category"] }) {
   // The AI agent sets the category in milestone 3; until then it is null.
   if (!category) return null;
   return <Badge variant="outline">{categoryLabels[category]}</Badge>;
+}
+
+export function UrgencyBadge({ urgency }: { urgency: Message["urgency"] }) {
+  if (!urgency) return null;
+  return (
+    <Badge variant={urgency === "high" ? "destructive" : "outline"}>
+      {urgencyLabels[urgency]}
+    </Badge>
+  );
 }

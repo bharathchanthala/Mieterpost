@@ -25,6 +25,16 @@ export const messageStatus = pgEnum("message_status", [
   "answered",
 ]);
 
+// How quickly the landlord should react. Set by the AI agent.
+export const messageUrgency = pgEnum("message_urgency", [
+  "low",
+  "normal",
+  "high",
+]);
+
+// Lifecycle of a reply: draft (AI wrote it) -> approved -> sent.
+export const replyStatus = pgEnum("reply_status", ["draft", "approved", "sent"]);
+
 // --- Tables ----------------------------------------------------------------
 // A building owned by the landlord.
 export const properties = pgTable("properties", {
@@ -72,9 +82,29 @@ export const messages = pgTable("messages", {
     .references(() => tenants.id, { onDelete: "cascade" }),
   subject: text().notNull(),
   body: text().notNull(),
+  // The next three columns are filled in by the AI agent.
   category: messageCategory(),
+  urgency: messageUrgency(),
+  summary: text(),
   status: messageStatus().notNull().default("new"),
   receivedAt: timestamp("received_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// The reply to a message. Each message has at most one reply (unique).
+export const replies = pgTable("replies", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  messageId: integer("message_id")
+    .notNull()
+    .unique()
+    .references(() => messages.id, { onDelete: "cascade" }),
+  body: text().notNull(),
+  status: replyStatus().notNull().default("draft"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
@@ -104,6 +134,14 @@ export const messagesRelations = relations(messages, ({ one }) => ({
     fields: [messages.tenantId],
     references: [tenants.id],
   }),
+  reply: one(replies),
+}));
+
+export const repliesRelations = relations(replies, ({ one }) => ({
+  message: one(messages, {
+    fields: [replies.messageId],
+    references: [messages.id],
+  }),
 }));
 
 // --- Types -----------------------------------------------------------------
@@ -111,3 +149,4 @@ export type Property = typeof properties.$inferSelect;
 export type Unit = typeof units.$inferSelect;
 export type Tenant = typeof tenants.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Reply = typeof replies.$inferSelect;

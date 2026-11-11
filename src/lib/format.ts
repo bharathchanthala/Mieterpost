@@ -53,3 +53,9 @@ export const categoryLabels: Record<
   question: "Question",
   other: "Other",
 };
+
+export const urgencyLabels: Record<NonNullable<Message["urgency"]>, string> = {
+  low: "Low urgency",
+  normal: "Normal urgency",
+  high: "High urgency",
+};

@@ -20,7 +20,10 @@ export async function getMessage(id: number) {
   await connection();
   return db.query.messages.findFirst({
     where: eq(messages.id, id),
-    with: { tenant: { with: { unit: { with: { property: true } } } } },
+    with: {
+      tenant: { with: { unit: { with: { property: true } } } },
+      reply: true,
+    },
   });
 }
 

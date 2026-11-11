@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { LoadingText, PageHeader } from "@/components/page-header";
-import { CategoryBadge, StatusBadge } from "@/components/status-badge";
+import {
+  CategoryBadge,
+  StatusBadge,
+  UrgencyBadge,
+} from "@/components/status-badge";
 import { Card } from "@/components/ui/card";
 import { getInbox } from "@/db/queries";
 import { formatDateTime } from "@/lib/format";
@@ -38,6 +42,7 @@ async function Inbox() {
               <div className="flex items-center justify-between gap-4">
                 <span className="truncate">{message.subject}</span>
                 <span className="flex shrink-0 items-center gap-1.5">
+                  <UrgencyBadge urgency={message.urgency} />
                   <CategoryBadge category={message.category} />
                   <StatusBadge status={message.status} />
                 </span>

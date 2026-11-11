@@ -2,8 +2,13 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { GenerateDraftButton } from "@/components/generate-draft-button";
 import { LoadingText } from "@/components/page-header";
-import { CategoryBadge, StatusBadge } from "@/components/status-badge";
+import {
+  CategoryBadge,
+  StatusBadge,
+  UrgencyBadge,
+} from "@/components/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -41,29 +46,55 @@ async function MessageDetail({ params }: PageProps<"/messages/[id]">) {
   const message = await getMessage(messageId);
   if (!message) notFound();
 
-  const { tenant } = message;
+  const { tenant, reply } = message;
   const { unit } = tenant;
   const { property } = unit;
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-lg">{message.subject}</CardTitle>
-          <CardDescription>
-            From {tenant.firstName} {tenant.lastName} ·{" "}
-            {formatDateTime(message.receivedAt)}
-          </CardDescription>
-          <div className="flex items-center gap-1.5 pt-1">
-            <StatusBadge status={message.status} />
-            <CategoryBadge category={message.category} />
-          </div>
-        </CardHeader>
-        <Separator />
-        <CardContent>
-          <p className="whitespace-pre-wrap leading-relaxed">{message.body}</p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col gap-6 lg:col-span-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{message.subject}</CardTitle>
+            <CardDescription>
+              From {tenant.firstName} {tenant.lastName} ·{" "}
+              {formatDateTime(message.receivedAt)}
+            </CardDescription>
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <StatusBadge status={message.status} />
+              <CategoryBadge category={message.category} />
+              <UrgencyBadge urgency={message.urgency} />
+            </div>
+          </CardHeader>
+          <Separator />
+          <CardContent>
+            <p className="whitespace-pre-wrap leading-relaxed">
+              {message.body}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>AI draft reply</CardTitle>
+            <CardDescription>
+              {message.summary ??
+                "Let the agent classify this message and draft a reply in German."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {reply ? (
+              <p className="whitespace-pre-wrap rounded-lg bg-muted/60 p-4 leading-relaxed">
+                {reply.body}
+              </p>
+            ) : null}
+            <GenerateDraftButton
+              messageId={message.id}
+              hasDraft={Boolean(reply)}
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="flex flex-col gap-6">
         <Card>
