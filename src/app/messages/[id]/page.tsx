@@ -4,14 +4,17 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { GenerateDraftButton } from "@/components/generate-draft-button";
 import { LoadingText } from "@/components/page-header";
+import { ReplyEditor } from "@/components/reply-editor";
 import {
   CategoryBadge,
   StatusBadge,
   UrgencyBadge,
 } from "@/components/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -24,6 +27,7 @@ import {
   formatDateTime,
   formatEuro,
   formatNumber,
+  replyStatusLabels,
 } from "@/lib/format";
 
 // One label/value line in the side cards.
@@ -47,6 +51,8 @@ async function MessageDetail({ params }: PageProps<"/messages/[id]">) {
   if (!message) notFound();
 
   const { tenant, reply } = message;
+  // Once approved (or sent), the reply can no longer be edited or regenerated.
+  const isLocked = reply ? reply.status !== "draft" : false;
   const { unit } = tenant;
   const { property } = unit;
 
@@ -76,22 +82,51 @@ async function MessageDetail({ params }: PageProps<"/messages/[id]">) {
 
         <Card>
           <CardHeader>
-            <CardTitle>AI draft reply</CardTitle>
+            <CardTitle>
+              {isLocked ? "Reply" : "AI draft reply"}
+            </CardTitle>
             <CardDescription>
               {message.summary ??
                 "Let the agent classify this message and draft a reply in German."}
             </CardDescription>
+            {reply ? (
+              <CardAction>
+                <Badge variant={isLocked ? "default" : "secondary"}>
+                  {replyStatusLabels[reply.status]}
+                </Badge>
+              </CardAction>
+            ) : null}
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {reply ? (
-              <p className="whitespace-pre-wrap rounded-lg bg-muted/60 p-4 leading-relaxed">
-                {reply.body}
-              </p>
+            {reply && isLocked ? (
+              // Approved replies are final: plain text, no form.
+              <>
+                <p className="whitespace-pre-wrap rounded-lg bg-muted/60 p-4 leading-relaxed">
+                  {reply.body}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Approved on {formatDateTime(reply.updatedAt)}
+                </p>
+              </>
             ) : null}
-            <GenerateDraftButton
-              messageId={message.id}
-              hasDraft={Boolean(reply)}
-            />
+
+            {reply && !isLocked ? (
+              // The key changes whenever the reply is saved or regenerated,
+              // which makes React rebuild the form with the latest text.
+              <ReplyEditor
+                key={reply.updatedAt.toISOString()}
+                messageId={message.id}
+                body={reply.body}
+                lastSaved={formatDateTime(reply.updatedAt)}
+              />
+            ) : null}
+
+            {!isLocked ? (
+              <GenerateDraftButton
+                messageId={message.id}
+                hasDraft={Boolean(reply)}
+              />
+            ) : null}
           </CardContent>
         </Card>
       </div>

@@ -1,5 +1,5 @@
 // Small helpers that turn raw database values into display text.
-import type { Message } from "@/db/schema";
+import type { Message, Reply } from "@/db/schema";
 
 const dateTimeFormat = new Intl.DateTimeFormat("en-GB", {
   dateStyle: "medium",
@@ -58,4 +58,10 @@ export const urgencyLabels: Record<NonNullable<Message["urgency"]>, string> = {
   low: "Low urgency",
   normal: "Normal urgency",
   high: "High urgency",
+};
+
+export const replyStatusLabels: Record<Reply["status"], string> = {
+  draft: "Draft",
+  approved: "Approved",
+  sent: "Sent",
 };

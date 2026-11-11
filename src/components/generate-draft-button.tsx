@@ -5,10 +5,10 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   generateDraft,
-  type DraftState,
+  type ActionState,
 } from "@/app/messages/[id]/actions";
 
-const initialState: DraftState = { error: null };
+const initialState: ActionState = { error: null };
 
 export function GenerateDraftButton({
   messageId,

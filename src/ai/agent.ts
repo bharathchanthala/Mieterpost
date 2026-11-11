@@ -3,6 +3,7 @@ import { generateText, isStepCount, Output, type LanguageModel } from "ai";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
+import { ReplyError } from "@/db/mutations";
 import { messages, replies } from "@/db/schema";
 import { getModel } from "./model";
 import { createTenantTools } from "./tools";
@@ -86,9 +87,13 @@ export async function processMessage(
 ) {
   const message = await db.query.messages.findFirst({
     where: eq(messages.id, messageId),
-    with: { tenant: true },
+    with: { tenant: true, reply: true },
   });
   if (!message) throw new Error(`Message ${messageId} not found.`);
+  // An approved reply is final. Refuse before spending money on an LLM call.
+  if (message.reply && message.reply.status !== "draft") {
+    throw new ReplyError("This reply was already approved and is locked.");
+  }
 
   const classification = await classifyMessage(message, model);
   const draft = await draftReply(
@@ -114,7 +119,9 @@ export async function processMessage(
       .values({ messageId, body: draft })
       .onConflictDoUpdate({
         target: replies.messageId,
-        set: { body: draft, status: "draft", updatedAt: new Date() },
+        set: { body: draft, updatedAt: new Date() },
+        // Second safety net: never overwrite a reply that is no longer a draft.
+        setWhere: eq(replies.status, "draft"),
       });
   });
 
