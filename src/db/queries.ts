@@ -1,14 +1,15 @@
 // All database questions the UI asks live here, so pages stay short and
 // every query can be found (and later tested) in one place.
-import { connection } from "next/server";
 import { asc, desc, eq } from "drizzle-orm";
+import { requireSession } from "@/lib/session";
 import { db } from "./index";
 import { messages, properties, tenants, units } from "./schema";
 
 // Every message, newest first, with its tenant -> unit -> property.
 export async function getInbox() {
-  // Wait for a real request so this is not executed while building.
-  await connection();
+  // Second gate after the proxy: no session, no data. Reading the session
+  // cookie also makes this run per request instead of at build time.
+  await requireSession();
   return db.query.messages.findMany({
     orderBy: desc(messages.receivedAt),
     with: { tenant: { with: { unit: { with: { property: true } } } } },
@@ -17,7 +18,7 @@ export async function getInbox() {
 
 // One message by id, or undefined when it does not exist.
 export async function getMessage(id: number) {
-  await connection();
+  await requireSession();
   return db.query.messages.findFirst({
     where: eq(messages.id, id),
     with: {
@@ -29,7 +30,7 @@ export async function getMessage(id: number) {
 
 // All tenants with the flat and building they live in.
 export async function getTenants() {
-  await connection();
+  await requireSession();
   return db.query.tenants.findMany({
     orderBy: [asc(tenants.lastName), asc(tenants.firstName)],
     with: { unit: { with: { property: true } } },
@@ -38,7 +39,7 @@ export async function getTenants() {
 
 // All properties with their flats and the tenants in each flat.
 export async function getProperties() {
-  await connection();
+  await requireSession();
   return db.query.properties.findMany({
     orderBy: asc(properties.name),
     with: {

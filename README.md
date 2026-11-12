@@ -10,12 +10,14 @@ classifies them and drafts a reply, and the landlord approves it.
 - shadcn/ui components
 - Vercel AI SDK with Gemini (structured output and tool calling)
 - Inngest durable workflows (send reply, wait, flag follow-up)
+- Password login with a signed, HTTP-only session cookie (jose)
 
 ## Getting started
 
 1. Install dependencies: `npm install`
 2. Create a database: `createdb -U postgres mieterpost` (or use pgAdmin).
-3. Copy `.env.example` to `.env.local` and set your PostgreSQL password and Gemini API key.
+3. Copy `.env.example` to `.env.local` and set your PostgreSQL password, Gemini API key,
+   a login password (`APP_PASSWORD`) and a session secret (`SESSION_SECRET`).
 4. Create the tables: `npm run db:push`
 5. Add demo data: `npm run db:seed`
 6. Start the app: `npm run dev` and open http://localhost:3000

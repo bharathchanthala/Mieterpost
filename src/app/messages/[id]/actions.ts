@@ -8,12 +8,20 @@ import { z } from "zod";
 import { processMessage } from "@/ai/agent";
 import { ReplyError, saveReply } from "@/db/mutations";
 import { inngest, REPLY_APPROVED } from "@/inngest/client";
+import { hasSession } from "@/lib/session";
 
 export type ActionState = { error: string | null };
 
 const messageIdSchema = z.number().int().positive();
 
+const NOT_SIGNED_IN: ActionState = {
+  error: "Your session has expired. Reload the page and sign in again.",
+};
+
 export async function generateDraft(messageId: number): Promise<ActionState> {
+  // A server action is a public HTTP endpoint. Anyone can call it directly,
+  // so it checks the session itself instead of trusting the page or proxy.
+  if (!(await hasSession())) return NOT_SIGNED_IN;
   // Never trust input from the browser, even from our own button.
   if (!messageIdSchema.safeParse(messageId).success) {
     return { error: "Invalid message." };
@@ -70,6 +78,7 @@ export async function updateReply(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  if (!(await hasSession())) return NOT_SIGNED_IN;
   if (!messageIdSchema.safeParse(messageId).success) {
     return { error: "Invalid message." };
   }
@@ -128,6 +137,7 @@ async function startSendWorkflow(messageId: number): Promise<ActionState> {
 }
 
 export async function retrySending(messageId: number): Promise<ActionState> {
+  if (!(await hasSession())) return NOT_SIGNED_IN;
   if (!messageIdSchema.safeParse(messageId).success) {
     return { error: "Invalid message." };
   }

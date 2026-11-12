@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { NavLink } from "@/components/nav-link";
+import { HeaderNav } from "@/components/header-nav";
 
 export function SiteHeader() {
   return (
@@ -9,14 +9,10 @@ export function SiteHeader() {
         <Link href="/" className="font-semibold tracking-tight">
           Mieterpost
         </Link>
-        <nav className="flex items-center gap-1" aria-label="Main navigation">
-          {/* NavLink reads the current URL, which is only known per request. */}
-          <Suspense>
-            <NavLink href="/">Inbox</NavLink>
-            <NavLink href="/tenants">Tenants</NavLink>
-            <NavLink href="/properties">Properties</NavLink>
-          </Suspense>
-        </nav>
+        {/* HeaderNav reads the current URL, which is only known per request. */}
+        <Suspense>
+          <HeaderNav />
+        </Suspense>
       </div>
     </header>
   );
