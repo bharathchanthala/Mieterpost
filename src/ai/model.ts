@@ -2,7 +2,7 @@
 import { google } from "@ai-sdk/google";
 
 // Change the model without touching code by setting AI_MODEL in .env.local.
-const modelId = process.env.AI_MODEL ?? "gemini-3.8-flash";
+const modelId = process.env.AI_MODEL ?? "gemini-3.5-flash-lite";
 
 export function getModel() {
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
