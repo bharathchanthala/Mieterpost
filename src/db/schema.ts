@@ -90,6 +90,9 @@ export const messages = pgTable("messages", {
   receivedAt: timestamp("received_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  // Set by the background workflow some time after the reply was sent, to
+  // remind the landlord to check whether the issue is really resolved.
+  followUpAt: timestamp("follow_up_at", { withTimezone: true }),
 });
 
 // The reply to a message. Each message has at most one reply (unique).
@@ -101,6 +104,7 @@ export const replies = pgTable("replies", {
     .references(() => messages.id, { onDelete: "cascade" }),
   body: text().notNull(),
   status: replyStatus().notNull().default("draft"),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

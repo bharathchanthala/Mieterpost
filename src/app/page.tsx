@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LoadingText, PageHeader } from "@/components/page-header";
 import {
   CategoryBadge,
+  FollowUpBadge,
   StatusBadge,
   UrgencyBadge,
 } from "@/components/status-badge";
@@ -42,6 +43,7 @@ async function Inbox() {
               <div className="flex items-center justify-between gap-4">
                 <span className="truncate">{message.subject}</span>
                 <span className="flex shrink-0 items-center gap-1.5">
+                  <FollowUpBadge followUpAt={message.followUpAt} />
                   <UrgencyBadge urgency={message.urgency} />
                   <CategoryBadge category={message.category} />
                   <StatusBadge status={message.status} />

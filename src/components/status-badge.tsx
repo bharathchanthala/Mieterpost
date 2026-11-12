@@ -27,3 +27,9 @@ export function UrgencyBadge({ urgency }: { urgency: Message["urgency"] }) {
     </Badge>
   );
 }
+
+// Appears once the background workflow has flagged the message.
+export function FollowUpBadge({ followUpAt }: { followUpAt: Date | null }) {
+  if (!followUpAt) return null;
+  return <Badge variant="secondary">Follow-up due</Badge>;
+}

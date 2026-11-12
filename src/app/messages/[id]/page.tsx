@@ -5,8 +5,10 @@ import { ArrowLeft } from "lucide-react";
 import { GenerateDraftButton } from "@/components/generate-draft-button";
 import { LoadingText } from "@/components/page-header";
 import { ReplyEditor } from "@/components/reply-editor";
+import { RetrySendingButton } from "@/components/retry-sending-button";
 import {
   CategoryBadge,
+  FollowUpBadge,
   StatusBadge,
   UrgencyBadge,
 } from "@/components/status-badge";
@@ -70,6 +72,7 @@ async function MessageDetail({ params }: PageProps<"/messages/[id]">) {
               <StatusBadge status={message.status} />
               <CategoryBadge category={message.category} />
               <UrgencyBadge urgency={message.urgency} />
+              <FollowUpBadge followUpAt={message.followUpAt} />
             </div>
           </CardHeader>
           <Separator />
@@ -104,9 +107,19 @@ async function MessageDetail({ params }: PageProps<"/messages/[id]">) {
                 <p className="whitespace-pre-wrap rounded-lg bg-muted/60 p-4 leading-relaxed">
                   {reply.body}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Approved on {formatDateTime(reply.updatedAt)}
-                </p>
+                {reply.sentAt ? (
+                  <p className="text-xs text-muted-foreground">
+                    Sent on {formatDateTime(reply.sentAt)} (simulated email)
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      Approved on {formatDateTime(reply.updatedAt)}. Sending
+                      happens in the background; reload in a moment.
+                    </p>
+                    <RetrySendingButton messageId={message.id} />
+                  </>
+                )}
               </>
             ) : null}
 

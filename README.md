@@ -9,7 +9,7 @@ classifies them and drafts a reply, and the landlord approves it.
 - PostgreSQL, Drizzle ORM
 - shadcn/ui components
 - Vercel AI SDK with Gemini (structured output and tool calling)
-- Planned: Inngest durable workflows
+- Inngest durable workflows (send reply, wait, flag follow-up)
 
 ## Getting started
 
@@ -19,6 +19,8 @@ classifies them and drafts a reply, and the landlord approves it.
 4. Create the tables: `npm run db:push`
 5. Add demo data: `npm run db:seed`
 6. Start the app: `npm run dev` and open http://localhost:3000
+7. In a second terminal, start the workflow engine: `npx inngest-cli@latest dev`
+   (dashboard at http://localhost:8288)
 
 ## Scripts
 
@@ -39,5 +41,5 @@ classifies them and drafts a reply, and the landlord approves it.
 - [x] 1. Setup and data model
 - [x] 2. Dashboard UI (inbox, message detail, tenants and units)
 - [x] 3. AI agent (classify, look up tenant data, draft reply)
-- [ ] 4. Durable workflow (approval, send, follow-up)
+- [x] 4. Durable workflow (approval, send, follow-up)
 - [ ] 5. Auth, polish, deploy
