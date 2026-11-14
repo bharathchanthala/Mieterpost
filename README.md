@@ -1,5 +1,7 @@
 # Mieterpost
 
+[![CI](https://github.com/bharathchanthala/Mieterpost/actions/workflows/ci.yml/badge.svg)](https://github.com/bharathchanthala/Mieterpost/actions/workflows/ci.yml)
+
 An AI inbox assistant for landlords. A tenant writes in, an AI agent classifies
 the message and drafts a reply in German, the landlord edits and approves it,
 and a background workflow sends it and schedules a follow-up.
@@ -61,6 +63,7 @@ flowchart LR
 | Workflows | Inngest (durable steps, sleep, retries) |
 | Auth | Password login, signed HTTP-only session cookie (jose) |
 | Validation | Zod |
+| Testing | Vitest, Inngest test engine, mocked LLM, GitHub Actions |
 | Hosting | Vercel, Neon, Inngest Cloud |
 
 ## Design decisions
@@ -89,11 +92,33 @@ flowchart LR
 - Email sending is simulated (logged, not delivered). Next: a real provider.
 - Login is one shared password, enough to protect a demo. Next: user accounts
   with hashed passwords and rate limiting.
-- There are no automated tests yet. Next: unit tests for the agent with a mock
-  model, and for the workflow with Inngest's test engine.
 - Messages are seeded. Next: an inbound email webhook.
 - The demo uses a free model tier, so the data must stay fictional. Real tenant
   data would need a paid tier or an EU-hosted model for GDPR reasons.
+
+## Tests
+
+29 automated tests run on every push (see the CI badge above). The language
+model is replaced by a mock, so tests need no API key, cost nothing, and give
+the same result every time.
+
+| Suite | Needs | What it checks |
+| --- | --- | --- |
+| Unit (15) | nothing | Formatting, session token checks (valid, forged, expired), classification against the schema, rejected workflow input |
+| Integration (14) | a PostgreSQL test database | Saving and approving replies, one winner for simultaneous approvals, the full agent run, tenant-scoped tools, the send workflow and duplicate events |
+
+```bash
+npm test                  # unit tests only
+npm run test:db:setup     # create tables in the test database (once)
+npm run test:all          # unit and integration tests
+```
+
+For integration tests, create `.env.test.local` with a database whose name
+ends in `_test` (the tests delete all rows, so other names are refused):
+
+```
+TEST_DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/mieterpost_test"
+```
 
 ## Run it locally
 
@@ -133,6 +158,10 @@ src/
 ├─ components/          UI components (ui/ holds shadcn/ui)
 ├─ lib/                 session handling, formatting helpers
 └─ proxy.ts             redirects visitors without a session
+tests/
+├─ unit/                fast tests without a database
+├─ integration/         tests against a PostgreSQL test database
+└─ helpers/             mock model, test data, test database guard
 ```
 
 ## Scripts
@@ -143,6 +172,9 @@ src/
 | `npm run build` | Production build |
 | `npm run typecheck` | Check types without building |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests |
+| `npm run test:all` | Run unit and integration tests |
+| `npm run test:db:setup` | Create tables in the test database |
 | `npm run db:push` | Sync `src/db/schema.ts` to the database |
 | `npm run db:seed` | Reset the database to fictional demo data |
 | `npm run db:studio` | Browse the database in Drizzle Studio |
